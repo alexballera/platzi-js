@@ -6,23 +6,33 @@
   var today = new Date();
   var timeNow = today.toLocaleTimeString();
 
+  var $body = $("body");
+  var $loader = $(".loader");
+  var nombreNuevaCiudad = $("[data-input='cityAdd']");
+  var buttonAdd = $("[data-button='add']");
+
   var cityWeather = {};
   cityWeather.zone;
   cityWeather.icon;
   cityWeather.temp;
   cityWeather.temp_max;
   cityWeather.temp_min;
-  cityWeather.humidity;
   cityWeather.main;
 
-  if(navigator.geolocation) {
+  $(buttonAdd).on("click", addNewCity);
 
+  $(nombreNuevaCiudad).on("keypress", function(event) {
+    if(event.which == 13) {
+      addNewCity(event);
+    }
+  });
+
+  if(navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(getCoords, errorFound);
 
   } else {
     alert("Tu navegador no permite geolocalización, Actualízate!!!");
   }
-
 
   function errorFound(error) {
     alert("Un error ocurrió: " + error.code);
@@ -45,10 +55,9 @@
     cityWeather.temp = data.main.temp - 273.15;
     cityWeather.temp_max = data.main.temp_max - 273.15;
     cityWeather.temp_min = data.main.temp_min - 273.15;
-    cityWeather.humidity = data.main.humidity;
     cityWeather.main = data.weather[0].main;  
 
-    renderTemplate();  
+    renderTemplate(cityWeather);  
   };
 
   function activateTemplate(id) {
@@ -56,7 +65,7 @@
     return document.importNode(t.content, true);
   };
 
-  function renderTemplate() {
+  function renderTemplate(cityWeather) {
     var clone = activateTemplate("#template--city");
 
     clone.querySelector("[data-time]").innerHTML = timeNow;
@@ -66,10 +75,25 @@
     clone.querySelector("[data-temp='min']").innerHTML = cityWeather.temp_min.toFixed(1);
     clone.querySelector("[data-temp='current']").innerHTML = cityWeather.temp.toFixed(1);
     
-    $(".loader").hide();
-    $("body").append(clone);
-    console.log(timeNow);
+    $($loader).hide();
+    $($body).append(clone);
+  }
 
+  function addNewCity(event) {
+    event.preventDefault(); //anulamos la funcionalidad del botón
+    $.getJSON(API_WEATHER_URL + "q=" + $(nombreNuevaCiudad).val(), getWeatherNewCity)
+  }
+
+  function getWeatherNewCity (data) {
+    cityWeather = {};
+    cityWeather.zone = data.name;
+    cityWeather.icon = IMG_WEATHER + data.weather[0].icon + ".png";
+    cityWeather.temp = data.main.temp - 273.15;
+    cityWeather.temp_max = data.main.temp_max - 273.15;
+    cityWeather.temp_min = data.main.temp_min - 273.15;
+    cityWeather.main = data.weather[0].main;
+
+    renderTemplate(cityWeather);
   }
 
 })();
