@@ -99,6 +99,8 @@
 
     $.getJSON(API_WORLDTIME_URL + $(nombreNuevaCiudad).val(), function(response) {
       
+      $(nombreNuevaCiudad).val("");
+      
       cityWeather = {};
       cityWeather.zone = data.name;
       cityWeather.icon = IMG_WEATHER + data.weather[0].icon + ".png";
