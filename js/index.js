@@ -13,6 +13,7 @@
   var nombreNuevaCiudad = $("[data-input='cityAdd']");
   var buttonAdd = $("[data-button='add']");
 
+  var cities = [];
   var cityWeather = {};
   cityWeather.zone;
   cityWeather.icon;
@@ -107,9 +108,10 @@
       cityWeather.main = data.weather[0].main;
 
       renderTemplate(cityWeather, response.data.time_zone[0].localtime);
-    });
-
     
-  }
+      cities.push(cityWeather);
+      localStorage.setItem("cities", JSON.stringify(cities));
 
+    });    
+  }
 })();
