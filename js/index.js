@@ -2,6 +2,8 @@
   var API_WEATHER_KEY = "a4d92d3c32b6bdb0dc995eea37fe5f03";
   var API_WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather?APPID=" + API_WEATHER_KEY + "&";
   var IMG_WEATHER = "http://openweathermap.org/img/w/";
+  var API_WORLDTIME_KEY = "41c88418b2c39dd9964ae621ff85d";
+  var API_WORLDTIME_URL = "http://api.worldweatheronline.com/free/v2/tz.ashx?format=json&key=" + API_WORLDTIME_KEY + "&q=";
 
   var today = new Date();
   var timeNow = today.toLocaleTimeString();
@@ -65,10 +67,18 @@
     return document.importNode(t.content, true);
   };
 
-  function renderTemplate(cityWeather) {
-    var clone = activateTemplate("#template--city");
+  function renderTemplate(cityWeather, localtime) {
 
-    clone.querySelector("[data-time]").innerHTML = timeNow;
+    var clone = activateTemplate("#template--city");
+    var timeToShow;
+
+    if (localtime) {
+      timeToShow = localtime.split(" ")[1];
+    }else{
+      timeToShow = timeNow;
+    }
+
+    clone.querySelector("[data-time]").innerHTML = timeToShow;
     clone.querySelector("[data-city]").innerHTML = cityWeather.zone;
     clone.querySelector("[data-icon]").src = cityWeather.icon;
     clone.querySelector("[data-temp='max']").innerHTML = cityWeather.temp_max.toFixed(1);
@@ -85,15 +95,21 @@
   }
 
   function getWeatherNewCity (data) {
-    cityWeather = {};
-    cityWeather.zone = data.name;
-    cityWeather.icon = IMG_WEATHER + data.weather[0].icon + ".png";
-    cityWeather.temp = data.main.temp - 273.15;
-    cityWeather.temp_max = data.main.temp_max - 273.15;
-    cityWeather.temp_min = data.main.temp_min - 273.15;
-    cityWeather.main = data.weather[0].main;
 
-    renderTemplate(cityWeather);
+    $.getJSON(API_WORLDTIME_URL + $(nombreNuevaCiudad).val(), function(response) {
+      
+      cityWeather = {};
+      cityWeather.zone = data.name;
+      cityWeather.icon = IMG_WEATHER + data.weather[0].icon + ".png";
+      cityWeather.temp = data.main.temp - 273.15;
+      cityWeather.temp_max = data.main.temp_max - 273.15;
+      cityWeather.temp_min = data.main.temp_min - 273.15;
+      cityWeather.main = data.weather[0].main;
+
+      renderTemplate(cityWeather, response.data.time_zone[0].localtime);
+    });
+
+    
   }
 
 })();
